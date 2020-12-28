@@ -78,6 +78,18 @@ public class ClientHandler {
                                 out.writeUTF("/end");
                                 break;
                             }
+
+                            if (str.startsWith("/nick")) {
+                                String[] token = str.split("\\s+", 2);
+                                if (server.getAuthService().changeNickname(login, token[1])) {
+                                    nickname = token[1];
+                                    server.broadcastClientList();
+                                    out.writeUTF("Никнейм успешно изменен");
+                                } else {
+                                    out.writeUTF("Не удалось изменить никнейм");
+                                }
+                            }
+
                         } else {
                             server.broadcastMsg(this, str);
                         }
