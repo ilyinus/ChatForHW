@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -15,9 +16,10 @@ public class Server {
 
     public Server() {
         clients = new CopyOnWriteArrayList<>();
-        authService = new SimpleAuthService();
+        //authService = new SimpleAuthService();
         try {
             server = new ServerSocket(PORT);
+            authService = new AuthServiceDB();
             System.out.println("server started!");
 
             while (true) {
@@ -26,7 +28,7 @@ public class Server {
                 new ClientHandler(this, socket);
             }
 
-        } catch (IOException e) {
+        } catch (IOException | SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             System.out.println("server closed");
