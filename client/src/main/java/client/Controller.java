@@ -21,6 +21,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -51,6 +52,7 @@ public class Controller implements Initializable {
     private Stage stage;
     private Stage regStage;
     private RegController regController;
+    private History history;
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
@@ -91,6 +93,7 @@ public class Controller implements Initializable {
             socket = new Socket(IP_ADDRESS, PORT);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+            history = new History();
 
             new Thread(() -> {
                 try {
@@ -110,6 +113,8 @@ public class Controller implements Initializable {
                             if (str.startsWith("/authok ")) {
                                 nickname = str.split("\\s")[1];
                                 setAuthenticated(true);
+                                history.init(nickname);
+                                history.getLastMessages(100).forEach((e) -> textArea.appendText(e + "\n"));
                                 break;
                             }
 
@@ -132,10 +137,12 @@ public class Controller implements Initializable {
                                 });
                             }
                             if (str.equals("/end")) {
+                                history.close();
                                 break;
                             }
                         } else {
                             textArea.appendText(str + "\n");
+                            history.writeMessage(str + "\n");
                         }
                     }
                 } catch (IOException e) {
