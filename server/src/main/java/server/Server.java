@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
     private ServerSocket server;
@@ -13,9 +15,11 @@ public class Server {
     private final int PORT = 8189;
     private List<ClientHandler> clients;
     private AuthService authService;
+    private ExecutorService threadPool;
 
     public Server() {
         clients = new CopyOnWriteArrayList<>();
+        threadPool = Executors.newCachedThreadPool();
         //authService = new SimpleAuthService();
         try {
             server = new ServerSocket(PORT);
@@ -37,7 +41,12 @@ public class Server {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            threadPool.shutdownNow();
         }
+    }
+
+    public ExecutorService getThreadPool() {
+        return threadPool;
     }
 
     public void broadcastMsg(ClientHandler sender, String msg) {
